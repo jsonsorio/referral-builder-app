@@ -1,8 +1,9 @@
 import React from 'react';
+import { Text, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { AntDesign } from '@expo/vector-icons'; 
 import { StackParamList } from './Stack.typeDefs';
 import { TabProps } from '../tab/Tab.typeDefs';
-import { StackHeaderTitle } from './components';
 import { colors } from '@theme';
 
 // views
@@ -25,8 +26,11 @@ export function CreateStackNavigator({ navigation }: TabProps) {
         name="CreateStack"
         options={{
           title: 'Create',
-          headerTitle: () => <StackHeaderTitle />,
-          headerTitleAlign: 'center',
+          headerTitle: () => (
+            <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
+              <AntDesign name="left" size={24} color="black" />
+            </View>
+          ),
         }}
       />
       {/* add more screens here later on... */}
@@ -42,8 +46,11 @@ export function ViewRecordsStackNavigator({ navigation }: TabProps) {
         name="ViewRecordsStack"
         options={{
           title: 'View',
-          headerTitle: () => <StackHeaderTitle />,
-          headerTitleAlign: 'center',
+          headerTitle: () => (
+            <View style={{flex: 1, flexDirection: 'row', alignItems: 'center'}}>
+              <AntDesign name="left" size={24} color="black" />
+            </View>
+          ),
         }}
       />
       {/* add more screens here later on... */}

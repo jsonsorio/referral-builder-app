@@ -1,15 +1,32 @@
 import React from 'react';
 import { Text, View, StyleSheet, StatusBar } from 'react-native';
 import Button from '@components/Button';
+import Header from '@components/Header';
 import { StackProps } from '@navigator/stack';
 import { colors } from '@theme';
+
+export default function ViewRecords({ navigation }: StackProps) {
+  return (
+    <View style={styles.root}>
+      <Header title="View Records" />
+      <Text style={styles.title}>{`View Records`}</Text>
+      <Button
+        title="Go back to Create"
+        titleStyle={styles.buttonTitle}
+        style={styles.button}
+        onPress={() => {
+          navigation.goBack();
+        }}
+      />
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 20,
     backgroundColor: colors.white,
   },
   title: {
@@ -28,20 +45,3 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
 });
-
-export default function ViewRecords({ navigation }: StackProps) {
-  return (
-    <View style={styles.root}>
-      <StatusBar barStyle="light-content" />
-      <Text style={styles.title}>{`View Records`}</Text>
-      <Button
-        title="Go back to Create"
-        titleStyle={styles.buttonTitle}
-        style={styles.button}
-        onPress={() => {
-          navigation.goBack();
-        }}
-      />
-    </View>
-  );
-}
