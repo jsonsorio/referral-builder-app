@@ -1,7 +1,9 @@
 export const colors = {
   primary: '#00A87B',
   gray: '#6B7280',
+  lightGray: '#F3F3F3',
   boldText: '#1A2A3A',
+  lightText: '#6E6893',
   black: '#000000',
   white: '#ffffff',
   placeholderText: '#9CA3AF',
@@ -10,4 +12,6 @@ export const colors = {
   warning: '#ffcc00',
   error: '#D02020',
   fieldBorder: '#E5E7EB',
+  secondaryBorderColor: '#C6C2DE',
+  separator: '#D9D5EC',
 };

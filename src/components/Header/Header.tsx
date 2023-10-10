@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { IHeader } from './Header.typeDefs';
-import { colors } from '@theme';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { IHeader } from "./Header.typeDefs";
+import { colors } from "@theme";
 
 export default function Header({ title, style, titleStyle }: IHeader) {
   return (
@@ -12,14 +12,14 @@ export default function Header({ title, style, titleStyle }: IHeader) {
 }
 
 const styles = StyleSheet.create({
-    headerTitleWrap: {
-        flexShrink: 1,
-        flexDirection: 'row',
-        alignItems: 'center'
-      },
-      headerTitle: {
-        fontSize: 24,
-        fontFamily: 'aestetico-semibold',
-        color: colors.boldText,
-      },
+  headerTitleWrap: {
+    flexShrink: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontFamily: "aestetico-semibold",
+    color: colors.boldText,
+  },
 });
