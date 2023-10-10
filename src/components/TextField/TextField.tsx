@@ -39,16 +39,17 @@ const TextField = forwardRef<TextFieldHandle, TextFieldProps>((props, ref) => {
                         setValue={field.onChange}
                         items={items}
                         style={[styles.input, style, {zIndex}]}
+                        placeholderStyle={{color: colors.placeholderText}}
                         dropDownContainerStyle={styles.dropdownContent}
                         textStyle={[styles.dropdownText, textStyle]}
                         ArrowDownIconComponent={() => (
-                            <AntDesign name="down" size={24} color="black" />
+                            <AntDesign name="down" size={14} color="black" />
                         )}
                         ArrowUpIconComponent={() => (
-                            <AntDesign name="up" size={24} color="black" />
+                            <AntDesign name="up" size={14} color="black" />
                         )}
                         TickIconComponent={() => (
-                            <AntDesign name="check" size={24} color="black" />
+                            <AntDesign name="check" size={14} color="black" />
                         )}
                     />
                 ) : (
@@ -98,12 +99,13 @@ const styles = StyleSheet.create({
 
     },
     dropdownText: {
-
+        fontFamily: 'inter-regular',
+        fontSize: 16
     },
     input: {
         borderRadius: 8,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: colors.gray,
+        borderWidth: 1,
+        borderColor: colors.fieldBorder,
         minHeight: 48,
         paddingHorizontal: 15,
         fontFamily: 'inter-regular',

@@ -15,8 +15,7 @@ const styles = StyleSheet.create({
     headerTitleWrap: {
         flexShrink: 1,
         flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 20
+        alignItems: 'center'
       },
       headerTitle: {
         fontSize: 24,

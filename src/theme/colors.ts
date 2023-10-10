@@ -9,4 +9,5 @@ export const colors = {
   success: '#54EB89',
   warning: '#ffcc00',
   error: '#D02020',
+  fieldBorder: '#E5E7EB',
 };
