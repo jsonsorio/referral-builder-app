@@ -1,25 +1,19 @@
-import { useEffect } from 'react';
-import { View } from 'react-native';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAppModule } from '@modules/app.module';
 import TabNavigator from './tab/Tab';
 
 function Navigator() {
-  const { dispatch, checked, loggedIn, loadUser } = useAppModule();
+  const { dispatch, fetchReferrals } = useAppModule();
 
   useEffect(() => {
-    dispatch(loadUser());
+    dispatch(fetchReferrals());
   }, []);
 
-  // TODO: switch router by loggedIn status
-  console.log('[##] loggedIn', loggedIn);
-
-  return checked && loggedIn ? (
+  return (
     <NavigationContainer>
       <TabNavigator />
     </NavigationContainer>
-  ) : (
-    <View />
   );
 }
 

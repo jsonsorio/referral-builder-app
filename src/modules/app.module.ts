@@ -2,57 +2,77 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { State, Dispatch } from '@utils/store';
 
-interface IAppUser {
-  name: string;
+interface IReferral {
+  _id: string;
+  firstname: string;
+  lastname: string;
   email: string;
-}
+  phone: string;
+  addressline1: string;
+  addressline2?: string;
+  suburb: string;
+  state: string;
+  postcode: string;
+  country: string;
+};
 
 interface IAppState {
-  checked: boolean;
-  loggedIn: boolean;
-  user?: IAppUser;
+  referrals: IReferral[];
+  countPerPage: number;
+  currentPage: number;
+  total: number;
 }
 
 const initialState: IAppState = {
-  checked: false,
-  loggedIn: false,
-  user: undefined,
+  referrals: [],
+  countPerPage: 0,
+  currentPage: 1,
+  total: 0,
 };
+
+async function sendRequest(input: RequestInfo, init?: RequestInit | undefined) {
+  const response = await fetch(input, init);
+  if (response.ok) {
+      return response;
+  } else {
+      const errorBody = await response.json();
+      throw new Error(errorBody.error);
+  }
+}
 
 const slice = createSlice({
   name: 'app',
   initialState,
   reducers: {
-    authenticate: (
+    saveReferrals: (
       state: IAppState,
-      { payload }: PayloadAction<{ loggedIn: boolean; user?: IAppUser }>,
+      { payload }: PayloadAction<{ referrals: IReferral[], countPerPage: number, currentPage: number, total: number }>,
     ) => {
-      state.checked = true;
-      state.loggedIn = payload.loggedIn;
-      state.user = payload.user;
+      state.referrals = payload.referrals;
+      state.countPerPage = payload.countPerPage;
+      state.currentPage = payload.currentPage;
+      state.total = payload.total;
     },
     reset: () => initialState,
   },
 });
 
 const asyncActions = {
-  loadUser: () => async (dispatch: Dispatch) => {
+  fetchReferrals: () => async (dispatch: Dispatch) => {
     try {
-      // simulate async function
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // update user
+      const response = await sendRequest("http://localhost:4000/api/referrals");
+      const resolvedRes = await response.json();
+  
       dispatch(
-        slice.actions.authenticate({
-          loggedIn: true,
-          user: {
-            name: 'test user',
-            email: 'test@test.com',
-          },
+        slice.actions.saveReferrals({
+          referrals: resolvedRes.items,
+          countPerPage: resolvedRes.countPerPage,
+          currentPage: resolvedRes.currentPage,
+          total: resolvedRes.total,
         }),
       );
     } catch (err) {
-      console.log('[##] err', err);
+      console.error('[##] err', err);
     }
   },
 };

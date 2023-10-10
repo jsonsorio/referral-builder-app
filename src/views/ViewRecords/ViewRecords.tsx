@@ -1,6 +1,8 @@
 import React from 'react';
+import { useAppModule } from '@modules/app.module';
 import { Text, View, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { MaskedText } from 'react-native-mask-text';
 import { AntDesign } from '@expo/vector-icons';
 import Header from '@components/Header';
 import { StackProps } from '@navigator/stack';
@@ -10,28 +12,11 @@ import SearchIcon from '@assets/icons/search';
 import TriangleDownIcon from '@assets/icons/triangledown';
 import MoreVerticalIcon from '@assets/icons/morevertical';
 
-const mockData = [
-  {
-    id: 1,
-    name: 'John Doe',
-    email: 'john.doe@gmail.com',
-    phone: '0412345678',
-  },
-  {
-    id: 2,
-    name: 'Jane Doe',
-    email: 'jane.doe@gmail.com',
-    phone: '0412345678',
-  },
-  {
-    id: 3,
-    name: 'John Smith',
-    email: 'john.smith@gmail.com',
-    phone: '0412345678',
-  },
-];
-
 export default function ViewRecords({ navigation }: StackProps) {
+  const { referrals, currentPage, countPerPage, total } = useAppModule();
+
+  const startIndex = (currentPage - 1) * countPerPage + 1;
+  const endIndex = currentPage * countPerPage;
 
   const renderListHeader = () => {
     return (
@@ -49,11 +34,11 @@ export default function ViewRecords({ navigation }: StackProps) {
         <View style={styles.rowAlign}>
           <Text style={styles.headerFooterText}>Rows per page: </Text>
           <TouchableOpacity style={styles.rowAlign}>
-            <Text style={styles.headerFooterText}>10  </Text>
+            <Text style={styles.headerFooterText}>{`${countPerPage} `}</Text>
             <TriangleDownIcon />
           </TouchableOpacity>
         </View>
-        <Text style={styles.headerFooterText}>1-10 of 276</Text>
+        <Text style={styles.headerFooterText}>{`${startIndex}-${endIndex} of ${total}`}</Text>
         <View style={[styles.rowAlign, styles.pagination]}>
           <TouchableOpacity>
             <AntDesign name="left" size={15} color={colors.lightText} />
@@ -67,20 +52,20 @@ export default function ViewRecords({ navigation }: StackProps) {
   };
 
   interface IItem {
-    id: number;
-    name: string;
+    firstname: string;
+    lastname: string;
     email?: string;
     phone: string;
   }
 
-  const renderItem = ({ item, index }: {item: IItem}) => {
+  const renderItem = ({ item, index }: {item: IItem, index: Number}) => {
     return (
       <View style={[styles.itemWrap, index === 0 && styles.firstItem]}>
         <View style={styles.nameEmailWrap}>
-          <Text style={styles.nameText}>{item.name}</Text>
-          <Text style={styles.emailText}>{item.email}</Text>
+          <Text style={styles.nameText}>{`${item.firstname} ${item.lastname}`}</Text>
+          <Text adjustsFontSizeToFit numberOfLines={1} style={styles.emailText}>{item.email}</Text>
         </View>
-        <Text style={styles.phoneText}>{item.phone}</Text>
+        <MaskedText mask="9999-999-9999" style={styles.phoneText}>{item.phone}</MaskedText>
         <TouchableOpacity style={styles.actionButton}>
           <MoreVerticalIcon />
         </TouchableOpacity>
@@ -89,7 +74,7 @@ export default function ViewRecords({ navigation }: StackProps) {
   };
 
   return (
-    <KeyboardAwareScrollView style={styles.root}>
+    <KeyboardAwareScrollView showsVerticalScrollIndicator={false} style={styles.root}>
       <View style={styles.upper}>
         <Header title="View Records" />
         <View style={styles.searchAndFilter}>
@@ -105,11 +90,12 @@ export default function ViewRecords({ navigation }: StackProps) {
       </View>
       <FlatList
         scrollEnabled={false}
-        data={mockData}
-        keyExtractor={(item) => item.id.toString()}
+        data={referrals}
+        keyExtractor={(item) => item._id.toString()}
         renderItem={renderItem}
         ListHeaderComponent={renderListHeader}
         ListFooterComponent={renderListFooter}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
       />
     </KeyboardAwareScrollView>
   );
