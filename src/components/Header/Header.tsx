@@ -16,10 +16,11 @@ const styles = StyleSheet.create({
         flexShrink: 1,
         flexDirection: 'row',
         alignItems: 'center',
+        marginBottom: 20
       },
       headerTitle: {
         fontSize: 24,
-        fontFamily: 'aestetico_semibold',
+        fontFamily: 'aestetico-semibold',
         color: colors.boldText,
       },
 });
