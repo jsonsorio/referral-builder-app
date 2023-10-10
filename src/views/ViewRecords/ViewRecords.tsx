@@ -13,10 +13,21 @@ import TriangleDownIcon from '@assets/icons/triangledown';
 import MoreVerticalIcon from '@assets/icons/morevertical';
 
 export default function ViewRecords({ navigation }: StackProps) {
-  const { referrals, currentPage, countPerPage, total } = useAppModule();
+  const { dispatch, fetchReferrals, referrals, currentPage, total } = useAppModule();
+  const countPerPage = 10;
 
   const startIndex = (currentPage - 1) * countPerPage + 1;
-  const endIndex = currentPage * countPerPage;
+  const endIndex = startIndex + referrals.length - 1;
+
+  const onViewNextPage = () => {
+    dispatch(fetchReferrals(currentPage + 1));
+  }
+
+  const onViewPrevPage = () => {
+    if (currentPage > 1) {
+      dispatch(fetchReferrals(currentPage - 1));
+    }
+  }
 
   const renderListHeader = () => {
     return (
@@ -40,10 +51,10 @@ export default function ViewRecords({ navigation }: StackProps) {
         </View>
         <Text style={styles.headerFooterText}>{`${startIndex}-${endIndex} of ${total}`}</Text>
         <View style={[styles.rowAlign, styles.pagination]}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={onViewPrevPage}>
             <AntDesign name="left" size={15} color={colors.lightText} />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={onViewNextPage}>
             <AntDesign name="right" size={15} color={colors.lightText} />
           </TouchableOpacity>
         </View>
@@ -62,7 +73,7 @@ export default function ViewRecords({ navigation }: StackProps) {
     return (
       <View style={[styles.itemWrap, index === 0 && styles.firstItem]}>
         <View style={styles.nameEmailWrap}>
-          <Text style={styles.nameText}>{`${item.firstname} ${item.lastname}`}</Text>
+          <Text adjustsFontSizeToFit numberOfLines={1} style={styles.nameText}>{`${item.firstname} ${item.lastname}`}</Text>
           <Text adjustsFontSizeToFit numberOfLines={1} style={styles.emailText}>{item.email}</Text>
         </View>
         <MaskedText mask="9999-999-9999" style={styles.phoneText}>{item.phone}</MaskedText>
