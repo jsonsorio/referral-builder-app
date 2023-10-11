@@ -130,7 +130,7 @@ export default function Create({ navigation }: StackProps) {
       </View>
     );
   }
-  console.log(createStatus)
+
   return (
     <>
       <KeyboardAwareScrollView
