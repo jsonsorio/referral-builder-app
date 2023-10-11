@@ -70,9 +70,9 @@ const slice = createSlice({
 });
 
 const asyncActions = {
-  fetchReferrals: (page: number = 1) => async (dispatch: Dispatch) => {
+  fetchReferrals: (page: number = 1, search: string = '') => async (dispatch: Dispatch) => {
     try {
-      const response = await sendRequest(`${API_URL}/referrals?page=` + page);
+      const response = await sendRequest(`${API_URL}/referrals?page=` + page + '&search=' + search);
       const resolvedRes = await response.json();
   
       dispatch(

@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useFocusEffect } from "@react-navigation/native";
+import { debounce } from 'lodash';
 import {
   Text,
   View,
@@ -29,7 +30,6 @@ import { useAppModule } from "@modules/app.module";
 const { height: screenHeight } = Dimensions.get("window");
 
 const AnimatedView = Animated.createAnimatedComponent(View);
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
 export default function ViewRecords({ navigation }: StackProps) {
   const { dispatch, fetchReferrals, referrals, currentPage, total } =
@@ -44,6 +44,7 @@ export default function ViewRecords({ navigation }: StackProps) {
   const hasReachedEnd = endIndex === total;
 
   const [height, setHeight] = useState(0);
+  const [query, setQuery] = useState("");
 
   useFocusEffect(
     useCallback(() => {
@@ -51,14 +52,24 @@ export default function ViewRecords({ navigation }: StackProps) {
     }, [])
   );
 
+  const debouncedSearch = debounce((text: string) => {
+    dispatch(fetchReferrals(1, text));
+  }, 500);
+
+  useEffect(() => {
+    debouncedSearch(query);
+    // Cleanup the debounced function when the component unmounts
+    return () => debouncedSearch.cancel();
+  }, [query]);
+
   const onViewNextPage = () => {
     pageDirection.current = "next";
-    dispatch(fetchReferrals(currentPage + 1));
+    dispatch(fetchReferrals(currentPage + 1, query));
   };
 
   const onViewPrevPage = () => {
     pageDirection.current = "prev";
-    dispatch(fetchReferrals(currentPage - 1));
+    dispatch(fetchReferrals(currentPage - 1, query));
   };
 
   const renderEmptyState = () => {
@@ -185,7 +196,12 @@ export default function ViewRecords({ navigation }: StackProps) {
             </TouchableOpacity>
             <View style={styles.searchInputWrap}>
               <SearchIcon />
-              <TextInput style={styles.searchInput} placeholder="Search" />
+              <TextInput
+                placeholder="Search"
+                value={query}
+                onChangeText={setQuery}
+                style={styles.searchInput}
+              />
             </View>
           </View>
         </View>
@@ -263,7 +279,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 10,
     fontSize: 16,
-    color: colors.primary,
   },
   listHeader: {
     flexDirection: "row",
