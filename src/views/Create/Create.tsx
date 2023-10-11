@@ -13,6 +13,7 @@ import Header from "@components/Header";
 import TextField from "@components/TextField";
 import { TextFieldHandle } from "@components/TextField/TextField.typeDefs";
 import { StackProps } from "@navigator/stack";
+import { useAppModule } from '@modules/app.module';
 import { colors } from "@theme";
 import countriesJSON from "@assets/countries.json";
 
@@ -47,11 +48,20 @@ export default function Create({ navigation }: StackProps) {
   const [openCountry, setOpenCountry] = useState<boolean>(false);
   const [openState, setOpenState] = useState<boolean>(false);
 
+  const { dispatch, createReferral, setCreateStatus, createStatus } = useAppModule();
+
   const { ...methods } = useForm<FormValues>({ mode: "onChange" });
 
   const countryWatch = useWatch<FormValues, "country">({name: 'country', control: methods.control});
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => console.log({ data });
+  const onSubmit: SubmitHandler<FormValues> = (data) => {
+    const payload = {
+      ...data,
+      phone: data.phone.replace(/\s/g, ""),
+    };
+    dispatch(createReferral(payload));
+    setCreateStatus("loading");
+  };
 
   const onError: SubmitErrorHandler<FormValues> = (errors, e) => {
     return console.log({ errors });
@@ -77,136 +87,175 @@ export default function Create({ navigation }: StackProps) {
     setOpenCountry(false);
   }, []);
 
+  const renderNotifModal = () => {
+    let notifMsg = "";
+    switch (createStatus) {
+      case "loading":
+        notifMsg = "Creating referral...";
+        break;
+      case "success":
+        notifMsg = "Referral created successfully!";
+        break;
+      case "error":
+        notifMsg = "Failed to create referral";
+        break;
+      default:
+        notifMsg = "";
+        break;
+    }
+    return (
+      <View style={styles.notifModalWrap}>
+        <View style={styles.notifModal}>
+          <Text style={styles.notifText}>
+            {notifMsg}
+          </Text>
+          <Button
+            title="OK"
+            onPress={() => {
+              setCreateStatus("idle");
+              if (createStatus === "success") {
+                navigation.navigate("ViewRecordsStack");
+              }
+            }}
+          />
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <KeyboardAwareScrollView
-      showsVerticalScrollIndicator={false}
-      style={styles.root}
-      contentContainerStyle={styles.scrollView}
-    >
-      <Header title="Referral Builder" />
-      <FormProvider {...methods}>
-        <Text style={styles.subHeader}>Personal Details</Text>
-        <View style={styles.form}>
-          <TextField
-            ref={firstnameRef}
-            name="firstname"
-            label="First Name"
-            rules={{required: 'First name is required'}}
-            onSubmitEditing={() => lastnameRef.current?.onFocus()}
-          />
-          <TextField
-            ref={lastnameRef}
-            name="lastname"
-            label="Last Name"
-            rules={{required: 'Last name is required'}}
-            onSubmitEditing={() => emailRef.current?.onFocus()}
-          />
-          <TextField
-            ref={emailRef}
-            name="email"
-            label="Email"
-            rules={{
-              required: "Email is required",
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: "Email format is not valid",
-              },
-            }}
-            onSubmitEditing={() => mobileRef.current?.onFocus()}
-          />
-          <TextField
-            ref={mobileRef}
-            name="phone"
-            label="Mobile"
-            maxLength={11}
-            rules={{
-              required: "Mobile is required",
-              pattern: {
-                value: /^\d{11}$/,
-                message: "Mobile format is not valid",
-              },
-            }}
-            onSubmitEditing={() => address1Ref.current?.onFocus()}
-          />
-        </View>
-        <Text style={styles.subHeader}>Address</Text>
-        <View style={styles.form}>
-          <TextField
-            ref={address1Ref}
-            name="addressline1"
-            label="Address line 1"
-            rules={{required: 'Address line 1 is required'}}
-            onSubmitEditing={() => address2Ref.current?.onFocus()}
-          />
-          <TextField
-            ref={address2Ref}
-            name="addressline2"
-            label="Address line 2"
-            onSubmitEditing={() => suburbRef.current?.onFocus()}
-          />
-          <TextField
-            ref={suburbRef}
-            name="suburb"
-            label="Suburb"
-            rules={{required: 'Suburb is required'}}
-          />
-          <TextField
-            type="dropdown"
-            open={openState}
-            name="state"
-            label="State"
-            placeholder="Select State"
-            items={states}
-            rules={{required: 'State is required'}}
-            searchable={states.length > 0}
-            searchPlaceholder="Search state..."
-            translation={{
-              NOTHING_TO_SHOW: states.length > 0 ? "State not found" : "Select a country first",
-            }}
-            schema={{
-              label: "name",
-              value: "name",
-            }}
-            setOpen={() => setOpenState(!openState)}
-            onOpen={onStateOpen}
-            zIndex={openState ? 1 : 0}
-          />
-          <TextField
-            ref={postcodeRef}
-            name="postcode"
-            label="Postcode"
-            rules={{required: "Postcode is required"}}
-          />
-          <TextField
-            type="dropdown"
-            open={openCountry}
-            name="country"
-            label="Country"
-            placeholder="Select Country"
-            items={countries}
-            rules={{required: "Country is required"}}
-            searchable
-            searchPlaceholder="Search country..."
-            translation={{
-              NOTHING_TO_SHOW: "Country not found",
-            }}
-            schema={{
-              label: "name",
-              value: "name",
-            }}
-            setOpen={() => setOpenCountry(!openCountry)}
-            onOpen={onCountryOpen}
-            zIndex={openCountry ? 1 : 0}
-          />
-        </View>
-      </FormProvider>
-      <Button
-        disabled={!methods.formState.isValid || !methods.formState.isDirty}
-        title="Create referral"
-        onPress={methods.handleSubmit(onSubmit, onError)}
-        style={styles.button}
-      />
-    </KeyboardAwareScrollView>
+    <>
+      <KeyboardAwareScrollView
+        showsVerticalScrollIndicator={false}
+        style={styles.root}
+        contentContainerStyle={styles.scrollView}
+      >
+        <Header title="Referral Builder" />
+        <FormProvider {...methods}>
+          <Text style={styles.subHeader}>Personal Details</Text>
+          <View style={styles.form}>
+            <TextField
+              ref={firstnameRef}
+              name="firstname"
+              label="First Name"
+              rules={{required: 'First name is required'}}
+              onSubmitEditing={() => lastnameRef.current?.onFocus()}
+            />
+            <TextField
+              ref={lastnameRef}
+              name="lastname"
+              label="Last Name"
+              rules={{required: 'Last name is required'}}
+              onSubmitEditing={() => emailRef.current?.onFocus()}
+            />
+            <TextField
+              ref={emailRef}
+              name="email"
+              label="Email"
+              rules={{
+                required: "Email is required",
+                pattern: {
+                  value: /\S+@\S+\.\S+/,
+                  message: "Email format is not valid",
+                },
+              }}
+              onSubmitEditing={() => mobileRef.current?.onFocus()}
+            />
+            <TextField
+              ref={mobileRef}
+              name="phone"
+              label="Mobile"
+              maxLength={11}
+              rules={{
+                required: "Mobile is required",
+                pattern: {
+                  value: /^\d{11}$/,
+                  message: "Mobile format is not valid",
+                },
+              }}
+              onSubmitEditing={() => address1Ref.current?.onFocus()}
+            />
+          </View>
+          <Text style={styles.subHeader}>Address</Text>
+          <View style={styles.form}>
+            <TextField
+              ref={address1Ref}
+              name="addressline1"
+              label="Address line 1"
+              rules={{required: 'Address line 1 is required'}}
+              onSubmitEditing={() => address2Ref.current?.onFocus()}
+            />
+            <TextField
+              ref={address2Ref}
+              name="addressline2"
+              label="Address line 2"
+              onSubmitEditing={() => suburbRef.current?.onFocus()}
+            />
+            <TextField
+              ref={suburbRef}
+              name="suburb"
+              label="Suburb"
+              rules={{required: 'Suburb is required'}}
+            />
+            <TextField
+              type="dropdown"
+              open={openState}
+              name="state"
+              label="State"
+              placeholder="Select State"
+              items={states}
+              rules={{required: 'State is required'}}
+              searchable={states.length > 0}
+              searchPlaceholder="Search state..."
+              translation={{
+                NOTHING_TO_SHOW: states.length > 0 ? "State not found" : "Select a country first",
+              }}
+              schema={{
+                label: "name",
+                value: "name",
+              }}
+              setOpen={() => setOpenState(!openState)}
+              onOpen={onStateOpen}
+              zIndex={openState ? 1 : 0}
+            />
+            <TextField
+              ref={postcodeRef}
+              name="postcode"
+              label="Postcode"
+              rules={{required: "Postcode is required"}}
+            />
+            <TextField
+              type="dropdown"
+              open={openCountry}
+              name="country"
+              label="Country"
+              placeholder="Select Country"
+              items={countries}
+              rules={{required: "Country is required"}}
+              searchable
+              searchPlaceholder="Search country..."
+              translation={{
+                NOTHING_TO_SHOW: "Country not found",
+              }}
+              schema={{
+                label: "name",
+                value: "name",
+              }}
+              setOpen={() => setOpenCountry(!openCountry)}
+              onOpen={onCountryOpen}
+              zIndex={openCountry ? 1 : 0}
+            />
+          </View>
+        </FormProvider>
+        <Button
+          disabled={!methods.formState.isValid || !methods.formState.isDirty}
+          title="Create referral"
+          onPress={methods.handleSubmit(onSubmit, onError)}
+          style={styles.button}
+        />
+      </KeyboardAwareScrollView>
+      {createStatus !== "idle" && renderNotifModal()}
+    </>
   );
 }
 
@@ -227,7 +276,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "aestetico-semibold",
     color: colors.gray,
-    marginVertical: 20,
+    marginVertical: 15,
+    lineHeight: 24,
   },
   form: {
     borderTopWidth: StyleSheet.hairlineWidth,
@@ -235,5 +285,21 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 40,
+  },
+  notifModalWrap: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  notifModal: {
+    height: "40%",
+    width: "90%",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.white,
+  },
+  notifText: {
+    fontSize: 16,
+    fontFamily: "inter-regular",
+    color: colors.white,
   },
 });

@@ -110,7 +110,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "aestetico-semibold",
     fontWeight: "400",
-    marginBottom: 10,
+    marginBottom: 5,
+    lineHeight: 24,
   },
   textField: {
     flexShrink: 1,
@@ -135,6 +136,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontFamily: "inter-regular",
     fontSize: 16,
+    lineHeight: 24,
   },
   errorMsg: {
     color: colors.error,

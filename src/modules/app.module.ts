@@ -4,8 +4,7 @@ import { State, Dispatch } from '@utils/store';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-interface IReferral {
-  _id: string;
+interface IReferralPayload {
   firstname: string;
   lastname: string;
   email: string;
@@ -18,11 +17,18 @@ interface IReferral {
   country: string;
 };
 
+interface IReferral extends IReferralPayload {
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 interface IAppState {
   referrals: IReferral[];
   countPerPage: number;
   currentPage: number;
   total: number;
+  createStatus: 'idle' | 'loading' | 'success' | 'error';
 }
 
 const initialState: IAppState = {
@@ -30,6 +36,7 @@ const initialState: IAppState = {
   countPerPage: 0,
   currentPage: 1,
   total: 0,
+  createStatus: 'idle',
 };
 
 async function sendRequest(input: RequestInfo, init?: RequestInit | undefined) {
@@ -55,6 +62,9 @@ const slice = createSlice({
       state.currentPage = payload.currentPage;
       state.total = payload.total;
     },
+    setCreateStatus: (state: IAppState, { payload }: PayloadAction<'idle' | 'loading' | 'success' | 'error'>) => {
+      state.createStatus = payload;
+    },
     reset: () => initialState,
   },
 });
@@ -77,6 +87,25 @@ const asyncActions = {
       console.error('[##] err', err);
     }
   },
+  createReferral: (referral: IReferralPayload) => async (dispatch: Dispatch) => {
+    try {
+      const response = await sendRequest(`${API_URL}/referrals`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(referral),
+      });
+
+      const resolvedRes = await response.json();
+  
+      if (resolvedRes) {
+        dispatch(slice.actions.setCreateStatus('success'));
+      }
+    } catch (err) {
+      console.error('[##] err', err);
+    }
+  }
 };
 
 export function useAppModule() {

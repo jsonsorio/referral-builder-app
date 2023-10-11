@@ -19,6 +19,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
+    lineHeight: 32,
     fontFamily: "aestetico-semibold",
     color: colors.boldText,
   },

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useAppModule } from "@modules/app.module";
+import React, { useState, useCallback, useRef } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   Text,
   View,
@@ -7,7 +7,13 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  Dimensions,
 } from "react-native";
+import Animated, {
+  SlideInRight,
+  SlideInLeft,
+  FadeOut,
+} from "react-native-reanimated";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { MaskedText } from "react-native-mask-text";
 import { AntDesign } from "@expo/vector-icons";
@@ -18,11 +24,17 @@ import FilterIcon from "@assets/icons/filter";
 import SearchIcon from "@assets/icons/search";
 import TriangleDownIcon from "@assets/icons/triangledown";
 import MoreVerticalIcon from "@assets/icons/morevertical";
+import { useAppModule } from "@modules/app.module";
+
+const { height: screenHeight } = Dimensions.get("window");
+
+const AnimatedView = Animated.createAnimatedComponent(View);
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
 export default function ViewRecords({ navigation }: StackProps) {
   const { dispatch, fetchReferrals, referrals, currentPage, total } =
     useAppModule();
-  
+  const pageDirection = useRef("next");
   const countPerPage = 10;
   const hasReferrals = referrals.length > 0;
   const startIndex = (currentPage - 1) * countPerPage + 1;
@@ -30,11 +42,19 @@ export default function ViewRecords({ navigation }: StackProps) {
 
   const [height, setHeight] = useState(0);
 
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchReferrals());
+    }, [])
+  );
+
   const onViewNextPage = () => {
+    pageDirection.current = "next";
     dispatch(fetchReferrals(currentPage + 1));
   };
 
   const onViewPrevPage = () => {
+    pageDirection.current = "prev";
     if (currentPage > 1) {
       dispatch(fetchReferrals(currentPage - 1));
     }
@@ -42,11 +62,11 @@ export default function ViewRecords({ navigation }: StackProps) {
 
   const renderEmptyState = () => {
     return (
-      <View style={{...styles.emptyState, ...{height: height / 1.5}}}>
+      <View style={{ ...styles.emptyState, ...{ height: height / 1.5 } }}>
         <Text style={styles.emptyStateText}>No records found</Text>
       </View>
     );
-  }
+  };
 
   const renderListHeader = () => {
     return (
@@ -74,10 +94,16 @@ export default function ViewRecords({ navigation }: StackProps) {
           {`${startIndex}-${endIndex} of ${total}`}
         </Text>
         <View style={[styles.rowAlign, styles.pagination]}>
-          <TouchableOpacity onPress={onViewPrevPage}>
+          <TouchableOpacity
+            onPress={onViewPrevPage}
+            style={styles.paginationBtn}
+          >
             <AntDesign name="left" size={15} color={colors.lightText} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={onViewNextPage}>
+          <TouchableOpacity
+            onPress={onViewNextPage}
+            style={styles.paginationBtn}
+          >
             <AntDesign name="right" size={15} color={colors.lightText} />
           </TouchableOpacity>
         </View>
@@ -92,9 +118,17 @@ export default function ViewRecords({ navigation }: StackProps) {
     phone: string;
   }
 
-  const renderItem = ({ item, index }: { item: IItem; index: Number }) => {
+  const renderItem = ({ item, index }: { item: IItem; index: number }) => {
     return (
-      <View style={[styles.itemWrap, index === 0 && styles.firstItem]}>
+      <AnimatedView
+        entering={
+          pageDirection?.current === "next"
+            ? SlideInRight.delay(index * 75)
+            : SlideInLeft.delay(index * 75)
+        }
+        exiting={FadeOut}
+        style={styles.itemWrap}
+      >
         <View style={styles.nameEmailWrap}>
           <Text
             adjustsFontSizeToFit
@@ -111,7 +145,7 @@ export default function ViewRecords({ navigation }: StackProps) {
         <TouchableOpacity style={styles.actionButton}>
           <MoreVerticalIcon />
         </TouchableOpacity>
-      </View>
+      </AnimatedView>
     );
   };
 
@@ -122,12 +156,12 @@ export default function ViewRecords({ navigation }: StackProps) {
         showsVerticalScrollIndicator={false}
         style={styles.root}
         onLayout={({ nativeEvent }) => {
-          const { x, y, width, height } = nativeEvent.layout
-             setHeight(height)
-       }}
+          const { x, y, width, height } = nativeEvent.layout;
+          setHeight(height);
+        }}
       >
         <View style={styles.upper}>
-          <Header title="View Records" />
+          <Header title="View records" />
           <View style={styles.searchAndFilter}>
             <TouchableOpacity style={styles.filterButton}>
               <FilterIcon />
@@ -148,7 +182,9 @@ export default function ViewRecords({ navigation }: StackProps) {
             ListHeaderComponent={renderListHeader}
             contentContainerStyle={styles.listContent}
           />
-        ) : renderEmptyState()}
+        ) : (
+          renderEmptyState()
+        )}
       </KeyboardAwareScrollView>
       {hasReferrals && renderListFooter()}
     </>
@@ -216,7 +252,7 @@ const styles = StyleSheet.create({
   listHeader: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
+    height: screenHeight * 0.06,
     paddingHorizontal: 16,
     backgroundColor: colors.lightGray,
     borderTopColor: colors.separator,
@@ -224,19 +260,19 @@ const styles = StyleSheet.create({
   },
   listContent: {
     flexGrow: 1,
-    paddingBottom: '15%'
+    paddingBottom: screenHeight * 0.09,
   },
   listFooter: {
     width: "100%",
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     justifyContent: "space-between",
     borderBottomColor: colors.separator,
     borderBottomWidth: 1,
-    borderTopWidth: 0,
+    paddingRight: 0,
   },
   headerFooterText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "inter-semibold",
     color: colors.lightText,
   },
@@ -247,7 +283,6 @@ const styles = StyleSheet.create({
   },
   actionColumn: {
     textAlign: "right",
-    alignSelf: "flex-end",
     flex: 1,
   },
   rowAlign: {
@@ -255,30 +290,33 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   pagination: {
-    width: "20%",
+    width: "30%",
     justifyContent: "space-between",
+  },
+  paginationBtn: {
+    height: screenHeight * 0.06,
+    width: 45,
+    alignItems: "center",
+    justifyContent: "center",
   },
   itemWrap: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderBottomColor: colors.separator,
-    borderBottomWidth: 1,
-  },
-  firstItem: {
     borderTopColor: colors.separator,
     borderTopWidth: 1,
   },
   nameEmailWrap: {
     width: "52%",
+    justifyContent: "space-evenly",
     paddingRight: 10,
   },
   nameText: {
     fontSize: 16,
     fontFamily: "inter-medium",
     textAlign: "left",
-    marginBottom: 10,
+    marginBottom: 2,
   },
   emailText: {
     fontSize: 16,

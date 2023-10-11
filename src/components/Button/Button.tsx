@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
     fontFamily: 'aestetico-semibold',
     color: 'white',
     textAlign: 'center',
+    lineHeight: 24,
   },
   button: {
     width: '95%',
