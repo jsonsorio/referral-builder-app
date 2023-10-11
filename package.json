@@ -2,7 +2,6 @@
   "name": "react-native-boilerplate",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
-  "proxy": "http://localhost:4000",
   "scripts": {
     "ci": "watchman watch-del-all && rm -rf node_modules && npm install",
     "start": "watchman watch-del-all && APP_ENV=prod npx expo start -c",

@@ -7,7 +7,8 @@
     "base": {
       "node": "16.20.1",
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "API_URL": "http://13.211.69.114/api"
       },
       "ios": {
         "image": "latest",
@@ -29,7 +30,8 @@
       "channel": "development",
       "distribution": "internal",
       "env": {
-        "APP_ENV": "dev"
+        "APP_ENV": "dev",
+        "API_URL": "http://13.211.69.114/api"
       },
       "android": {
         "gradleCommand": ":app:assembleRelease"
@@ -44,7 +46,8 @@
       "channel": "staging",
       "distribution": "internal",
       "env": {
-        "APP_ENV": "stg"
+        "APP_ENV": "stg",
+        "API_URL": "http://13.211.69.114/api"
       },
       "ios": {
         "enterpriseProvisioning": "universal"
@@ -54,7 +57,8 @@
       "extends": "base",
       "channel": "production",
       "env": {
-        "APP_ENV": "prod"
+        "APP_ENV": "prod",
+        "API_URL": "http://13.211.69.114/api"
       }
     }
   },

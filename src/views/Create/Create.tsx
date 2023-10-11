@@ -76,7 +76,7 @@ export default function Create({ navigation }: StackProps) {
   const onStateOpen = useCallback(() => {
     setOpenCountry(false);
   }, []);
-  console.log('STATES', states);
+
   return (
     <KeyboardAwareScrollView
       showsVerticalScrollIndicator={false}

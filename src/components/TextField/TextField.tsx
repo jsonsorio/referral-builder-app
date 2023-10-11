@@ -53,7 +53,7 @@ const TextField = forwardRef<TextFieldHandle, TextFieldProps>((props, ref) => {
       inputRef.current?.blur();
     },
   }));
-  console.log('items', items);
+
   return (
     <View style={[styles.container, { zIndex }]}>
       <Text style={styles.label}>{label}</Text>

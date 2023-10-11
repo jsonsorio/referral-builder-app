@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAppModule } from "@modules/app.module";
 import {
   Text,
@@ -22,10 +22,13 @@ import MoreVerticalIcon from "@assets/icons/morevertical";
 export default function ViewRecords({ navigation }: StackProps) {
   const { dispatch, fetchReferrals, referrals, currentPage, total } =
     useAppModule();
+  
   const countPerPage = 10;
-
+  const hasReferrals = referrals.length > 0;
   const startIndex = (currentPage - 1) * countPerPage + 1;
   const endIndex = startIndex + referrals.length - 1;
+
+  const [height, setHeight] = useState(0);
 
   const onViewNextPage = () => {
     dispatch(fetchReferrals(currentPage + 1));
@@ -36,6 +39,14 @@ export default function ViewRecords({ navigation }: StackProps) {
       dispatch(fetchReferrals(currentPage - 1));
     }
   };
+
+  const renderEmptyState = () => {
+    return (
+      <View style={{...styles.emptyState, ...{height: height / 1.5}}}>
+        <Text style={styles.emptyStateText}>No records found</Text>
+      </View>
+    );
+  }
 
   const renderListHeader = () => {
     return (
@@ -107,8 +118,13 @@ export default function ViewRecords({ navigation }: StackProps) {
   return (
     <>
       <KeyboardAwareScrollView
+        scrollEnabled={hasReferrals}
         showsVerticalScrollIndicator={false}
         style={styles.root}
+        onLayout={({ nativeEvent }) => {
+          const { x, y, width, height } = nativeEvent.layout
+             setHeight(height)
+       }}
       >
         <View style={styles.upper}>
           <Header title="View Records" />
@@ -123,16 +139,18 @@ export default function ViewRecords({ navigation }: StackProps) {
             </View>
           </View>
         </View>
-        <FlatList
-          scrollEnabled={false}
-          data={referrals}
-          keyExtractor={(item) => item._id.toString()}
-          renderItem={renderItem}
-          ListHeaderComponent={renderListHeader}
-          contentContainerStyle={styles.listContent}
-        />
+        {hasReferrals ? (
+          <FlatList
+            scrollEnabled={false}
+            data={referrals}
+            keyExtractor={(item) => item._id.toString()}
+            renderItem={renderItem}
+            ListHeaderComponent={renderListHeader}
+            contentContainerStyle={styles.listContent}
+          />
+        ) : renderEmptyState()}
       </KeyboardAwareScrollView>
-      {renderListFooter()}
+      {hasReferrals && renderListFooter()}
     </>
   );
 }
@@ -277,5 +295,14 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     width: "6%",
+  },
+  emptyState: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontFamily: "inter-regular",
+    color: colors.lightText,
   },
 });

@@ -2,6 +2,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { State, Dispatch } from '@utils/store';
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
 interface IReferral {
   _id: string;
   firstname: string;
@@ -60,7 +62,7 @@ const slice = createSlice({
 const asyncActions = {
   fetchReferrals: (page: number = 1) => async (dispatch: Dispatch) => {
     try {
-      const response = await sendRequest("http://localhost:4000/api/referrals?page=" + page);
+      const response = await sendRequest(`${API_URL}/referrals?page=` + page);
       const resolvedRes = await response.json();
   
       dispatch(
