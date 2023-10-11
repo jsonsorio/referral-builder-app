@@ -52,11 +52,15 @@ export default function Create({ navigation }: StackProps) {
 
   const { ...methods } = useForm<FormValues>({ mode: "onChange" });
 
+  // get the country and state values from the form
   const countryWatch = useWatch<FormValues, "country">({name: 'country', control: methods.control});
+  const stateWatch = useWatch<FormValues, "state">({name: 'state', control: methods.control});
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     const payload = {
       ...data,
+      country: countryWatch,
+      state: stateWatch,
       phone: data.phone.replace(/\s/g, ""),
     };
     dispatch(createReferral(payload));
@@ -94,7 +98,7 @@ export default function Create({ navigation }: StackProps) {
         notifMsg = "Creating referral...";
         break;
       case "success":
-        notifMsg = "Referral created successfully!";
+        notifMsg = "Referral created successfully";
         break;
       case "error":
         notifMsg = "Failed to create referral";
@@ -109,20 +113,24 @@ export default function Create({ navigation }: StackProps) {
           <Text style={styles.notifText}>
             {notifMsg}
           </Text>
-          <Button
-            title="OK"
-            onPress={() => {
-              setCreateStatus("idle");
-              if (createStatus === "success") {
-                navigation.navigate("ViewRecordsStack");
-              }
-            }}
-          />
+          {createStatus !== "loading" && (
+            <Button
+              title="OK"
+              onPress={() => {
+                dispatch(setCreateStatus("idle"));
+                if (createStatus === "success") {
+                  methods.reset();
+                  navigation.navigate("ViewRecordsTab");
+                }
+              }}
+              style={styles.notifBtn}
+            />
+          )}
         </View>
       </View>
     );
   }
-
+  console.log(createStatus)
   return (
     <>
       <KeyboardAwareScrollView
@@ -159,6 +167,7 @@ export default function Create({ navigation }: StackProps) {
                   message: "Email format is not valid",
                 },
               }}
+              keyboardType="email-address"
               onSubmitEditing={() => mobileRef.current?.onFocus()}
             />
             <TextField
@@ -173,6 +182,7 @@ export default function Create({ navigation }: StackProps) {
                   message: "Mobile format is not valid",
                 },
               }}
+              keyboardType="phone-pad"
               onSubmitEditing={() => address1Ref.current?.onFocus()}
             />
           </View>
@@ -223,6 +233,7 @@ export default function Create({ navigation }: StackProps) {
               name="postcode"
               label="Postcode"
               rules={{required: "Postcode is required"}}
+              keyboardType="number-pad"
             />
             <TextField
               type="dropdown"
@@ -248,7 +259,7 @@ export default function Create({ navigation }: StackProps) {
           </View>
         </FormProvider>
         <Button
-          disabled={!methods.formState.isValid || !methods.formState.isDirty}
+          disabled={!methods.formState.isValid}
           title="Create referral"
           onPress={methods.handleSubmit(onSubmit, onError)}
           style={styles.button}
@@ -289,6 +300,8 @@ const styles = StyleSheet.create({
   notifModalWrap: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   notifModal: {
     height: "40%",
@@ -296,10 +309,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.white,
+    borderRadius: 10,
   },
   notifText: {
-    fontSize: 16,
-    fontFamily: "inter-regular",
-    color: colors.white,
+    position: "absolute",
+    top: "30%",
+    width: "80%",
+    textAlign: "center",
+    fontSize: 24,
+    fontFamily: "aestetico-bold",
+    lineHeight: 30,
+  },
+  notifBtn: {
+    width: "80%",
+    position: "absolute",
+    bottom: 20,
   },
 });

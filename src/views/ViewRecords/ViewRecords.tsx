@@ -40,6 +40,9 @@ export default function ViewRecords({ navigation }: StackProps) {
   const startIndex = (currentPage - 1) * countPerPage + 1;
   const endIndex = startIndex + referrals.length - 1;
 
+  const hasReachedStart = startIndex === 1;
+  const hasReachedEnd = endIndex === total;
+
   const [height, setHeight] = useState(0);
 
   useFocusEffect(
@@ -55,9 +58,7 @@ export default function ViewRecords({ navigation }: StackProps) {
 
   const onViewPrevPage = () => {
     pageDirection.current = "prev";
-    if (currentPage > 1) {
-      dispatch(fetchReferrals(currentPage - 1));
-    }
+    dispatch(fetchReferrals(currentPage - 1));
   };
 
   const renderEmptyState = () => {
@@ -95,16 +96,26 @@ export default function ViewRecords({ navigation }: StackProps) {
         </Text>
         <View style={[styles.rowAlign, styles.pagination]}>
           <TouchableOpacity
+            disabled={hasReachedStart}
             onPress={onViewPrevPage}
             style={styles.paginationBtn}
           >
-            <AntDesign name="left" size={15} color={colors.lightText} />
+            <AntDesign
+              name="left"
+              size={15}
+              color={hasReachedStart ? colors.separator : colors.lightText}
+            />
           </TouchableOpacity>
           <TouchableOpacity
+            disabled={hasReachedEnd}
             onPress={onViewNextPage}
             style={styles.paginationBtn}
           >
-            <AntDesign name="right" size={15} color={colors.lightText} />
+            <AntDesign
+              name="right"
+              size={15}
+              color={hasReachedEnd ? colors.separator : colors.lightText}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -123,11 +134,16 @@ export default function ViewRecords({ navigation }: StackProps) {
       <AnimatedView
         entering={
           pageDirection?.current === "next"
-            ? SlideInRight.delay(index * 75)
-            : SlideInLeft.delay(index * 75)
+            ? SlideInRight.delay(index * 20)
+            : SlideInLeft.delay(index * 20)
         }
         exiting={FadeOut}
-        style={styles.itemWrap}
+        style={[
+          styles.itemWrap,
+          index === referrals.length - 1 &&
+            referrals.length < countPerPage &&
+            styles.lastItem,
+        ]}
       >
         <View style={styles.nameEmailWrap}>
           <Text
@@ -306,6 +322,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderTopColor: colors.separator,
     borderTopWidth: 1,
+  },
+  lastItem: {
+    borderBottomColor: colors.separator,
+    borderBottomWidth: 1,
   },
   nameEmailWrap: {
     width: "52%",
