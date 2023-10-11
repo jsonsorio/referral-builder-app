@@ -13,7 +13,7 @@ import {
     name: string;
     label?: string;
     type?: string;
-    defaultValue?: string
+    zIndex?: number;
     style?: StyleProp<ViewStyle>;
     textStyle?: StyleProp<TextStyle>;
     errorMsgStyle?: StyleProp<TextStyle>;

@@ -28,7 +28,6 @@ const TextField = forwardRef<TextFieldHandle, TextFieldProps>((props, ref) => {
     label,
     name,
     rules,
-    defaultValue,
     items,
     type,
     zIndex,
@@ -42,7 +41,7 @@ const TextField = forwardRef<TextFieldHandle, TextFieldProps>((props, ref) => {
   const formContext = useFormContext();
   const { formState } = formContext;
 
-  const { field } = useController({ name, rules, defaultValue });
+  const { field } = useController({ name, rules });
 
   const hasError = Boolean(formState?.errors[name]);
 
@@ -54,9 +53,9 @@ const TextField = forwardRef<TextFieldHandle, TextFieldProps>((props, ref) => {
       inputRef.current?.blur();
     },
   }));
-
+  console.log('items', items);
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { zIndex }]}>
       <Text style={styles.label}>{label}</Text>
       {type === "dropdown" ? (
         <DropDownPicker
@@ -65,7 +64,7 @@ const TextField = forwardRef<TextFieldHandle, TextFieldProps>((props, ref) => {
           value={field.value}
           setValue={field.onChange}
           items={items}
-          style={[styles.input, style, { zIndex }]}
+          style={[styles.input, style]}
           placeholderStyle={{ color: colors.placeholderText }}
           dropDownContainerStyle={styles.dropdownContent}
           textStyle={[styles.dropdownText, textStyle]}
@@ -118,7 +117,12 @@ const styles = StyleSheet.create({
   },
   dropdownWrap: {},
   dropdown: {},
-  dropdownContent: {},
+  dropdownContent: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.fieldBorder,
+    marginTop: 5,
+  },
   dropdownText: {
     fontFamily: "inter-regular",
     fontSize: 16,
