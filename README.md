@@ -5,8 +5,9 @@ A simple React Native mobile application built with Expo CLI
 ## Quick Start
 
 1. Install packages with `npm install`
-2. Spin up dev environment with `npm run start` or `expo start --tunnel`
-3. Scan the QR code to run it on your mobile device (if you don't have a simulator/emulator)
+2. Create `.env` file containing environment variables at the root folder.
+3. Spin up dev environment with `npm run start` or `expo start --tunnel`
+4. Scan the QR code to run it on your mobile device (if you don't have a simulator/emulator)
 
 # Android
 
