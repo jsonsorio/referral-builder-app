@@ -64,12 +64,20 @@ export default function Create({ navigation }: StackProps) {
       phone: data.phone.replace(/\s/g, ""),
     };
     dispatch(createReferral(payload));
-    setCreateStatus("loading");
+    dispatch(setCreateStatus("loading"));
   };
 
   const onError: SubmitErrorHandler<FormValues> = (errors, e) => {
     return console.log({ errors });
   };
+
+  const handleNotifBtnPress = () => {
+    dispatch(setCreateStatus("idle"));
+    if (createStatus === "success") {
+      methods.reset();
+      navigation.navigate("ViewRecordsTab");
+    }
+  }
 
   useEffect(() => {
     if (countryWatch) {
@@ -116,13 +124,7 @@ export default function Create({ navigation }: StackProps) {
           {createStatus !== "loading" && (
             <Button
               title="OK"
-              onPress={() => {
-                dispatch(setCreateStatus("idle"));
-                if (createStatus === "success") {
-                  methods.reset();
-                  navigation.navigate("ViewRecordsTab");
-                }
-              }}
+              onPress={handleNotifBtnPress}
               style={styles.notifBtn}
             />
           )}

@@ -5,6 +5,7 @@ import {
   TextInput,
   TextInputProps,
   StyleSheet,
+  Platform,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import {
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
     fontFamily: "aestetico-semibold",
     fontWeight: "400",
     marginBottom: 5,
-    lineHeight: 24,
+    lineHeight: Platform.OS === 'ios' ? 18 : 24,
   },
   textField: {
     flexShrink: 1,
