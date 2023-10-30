@@ -31,6 +31,132 @@ const { height: screenHeight } = Dimensions.get("window");
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
+interface IItem {
+  firstname: string;
+  lastname: string;
+  email?: string;
+  phone: string;
+}
+
+interface IReferralItemProps {
+  item: IItem;
+  index: number;
+  pageDirection: string;
+  totalReferral: number;
+  countPerPage: number;
+}
+
+const ReferralItem = (
+  { item, index, pageDirection, totalReferral, countPerPage }:
+    IReferralItemProps
+) => {
+  return (
+    <AnimatedView
+      entering={
+        pageDirection === "next"
+          ? SlideInRight.delay(index * 20)
+          : SlideInLeft.delay(index * 20)
+      }
+      exiting={FadeOut}
+      style={[
+        styles.itemWrap,
+        index === totalReferral - 1 &&
+        totalReferral < countPerPage &&
+          styles.lastItem,
+      ]}
+    >
+      <View style={styles.nameEmailWrap}>
+        <Text
+          adjustsFontSizeToFit
+          numberOfLines={1}
+          style={styles.nameText}
+        >{`${item.firstname} ${item.lastname}`}</Text>
+        <Text adjustsFontSizeToFit numberOfLines={1} style={styles.emailText}>
+          {item.email}
+        </Text>
+      </View>
+      <MaskedText mask="9999-999-9999" style={styles.phoneText}>
+        {item.phone}
+      </MaskedText>
+      <TouchableOpacity style={styles.actionButton}>
+        <MoreVerticalIcon />
+      </TouchableOpacity>
+    </AnimatedView>
+  );
+};
+
+const ListHeader = () => {
+  return (
+    <View style={styles.listHeader}>
+      <Text style={[styles.headerFooterText, styles.nameColumn]}>NAME</Text>
+      <Text style={styles.headerFooterText}>PHONE</Text>
+      <Text style={[styles.headerFooterText, styles.actionColumn]}>
+        ACTIONS
+      </Text>
+    </View>
+  );
+};
+
+interface IListFooterProps {
+  countPerPage: number;
+  startIndex: number;
+  endIndex: number;
+  total: number;
+  hasReachedStart: boolean;
+  hasReachedEnd: boolean;
+  onViewPrevPage: () => void;
+  onViewNextPage: () => void;
+}
+
+const ListFooter = ({ countPerPage, startIndex, endIndex, total, hasReachedStart, hasReachedEnd, onViewPrevPage, onViewNextPage } : IListFooterProps) => {
+  return (
+    <View style={[styles.listHeader, styles.listFooter]}>
+      <View style={styles.rowAlign}>
+        <Text style={styles.headerFooterText}>Rows per page: </Text>
+        <TouchableOpacity style={styles.rowAlign}>
+          <Text style={styles.headerFooterText}>{`${countPerPage} `}</Text>
+          <TriangleDownIcon />
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.headerFooterText}>
+        {`${startIndex}-${endIndex} of ${total}`}
+      </Text>
+      <View style={[styles.rowAlign, styles.pagination]}>
+        <TouchableOpacity
+          disabled={hasReachedStart}
+          onPress={onViewPrevPage}
+          style={styles.paginationBtn}
+        >
+          <AntDesign
+            name="left"
+            size={15}
+            color={hasReachedStart ? colors.separator : colors.lightText}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          disabled={hasReachedEnd}
+          onPress={onViewNextPage}
+          style={styles.paginationBtn}
+        >
+          <AntDesign
+            name="right"
+            size={15}
+            color={hasReachedEnd ? colors.separator : colors.lightText}
+          />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+const EmptyState = ({height} : {height: number}) => {
+  return (
+    <View style={{ ...styles.emptyState, ...{ height: height / 1.5 } }}>
+      <Text style={styles.emptyStateText}>No records found</Text>
+    </View>
+  );
+};
+
 export default function ViewRecords({ navigation }: StackProps) {
   const { dispatch, fetchReferrals, referrals, currentPage, total } =
     useAppModule();
@@ -72,110 +198,6 @@ export default function ViewRecords({ navigation }: StackProps) {
     dispatch(fetchReferrals(currentPage - 1, query));
   };
 
-  const renderEmptyState = () => {
-    return (
-      <View style={{ ...styles.emptyState, ...{ height: height / 1.5 } }}>
-        <Text style={styles.emptyStateText}>No records found</Text>
-      </View>
-    );
-  };
-
-  const renderListHeader = () => {
-    return (
-      <View style={styles.listHeader}>
-        <Text style={[styles.headerFooterText, styles.nameColumn]}>NAME</Text>
-        <Text style={styles.headerFooterText}>PHONE</Text>
-        <Text style={[styles.headerFooterText, styles.actionColumn]}>
-          ACTIONS
-        </Text>
-      </View>
-    );
-  };
-
-  const renderListFooter = () => {
-    return (
-      <View style={[styles.listHeader, styles.listFooter]}>
-        <View style={styles.rowAlign}>
-          <Text style={styles.headerFooterText}>Rows per page: </Text>
-          <TouchableOpacity style={styles.rowAlign}>
-            <Text style={styles.headerFooterText}>{`${countPerPage} `}</Text>
-            <TriangleDownIcon />
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.headerFooterText}>
-          {`${startIndex}-${endIndex} of ${total}`}
-        </Text>
-        <View style={[styles.rowAlign, styles.pagination]}>
-          <TouchableOpacity
-            disabled={hasReachedStart}
-            onPress={onViewPrevPage}
-            style={styles.paginationBtn}
-          >
-            <AntDesign
-              name="left"
-              size={15}
-              color={hasReachedStart ? colors.separator : colors.lightText}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            disabled={hasReachedEnd}
-            onPress={onViewNextPage}
-            style={styles.paginationBtn}
-          >
-            <AntDesign
-              name="right"
-              size={15}
-              color={hasReachedEnd ? colors.separator : colors.lightText}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
-
-  interface IItem {
-    firstname: string;
-    lastname: string;
-    email?: string;
-    phone: string;
-  }
-
-  const renderItem = ({ item, index }: { item: IItem; index: number }) => {
-    return (
-      <AnimatedView
-        entering={
-          pageDirection?.current === "next"
-            ? SlideInRight.delay(index * 20)
-            : SlideInLeft.delay(index * 20)
-        }
-        exiting={FadeOut}
-        style={[
-          styles.itemWrap,
-          index === referrals.length - 1 &&
-            referrals.length < countPerPage &&
-            styles.lastItem,
-        ]}
-      >
-        <View style={styles.nameEmailWrap}>
-          <Text
-            adjustsFontSizeToFit
-            numberOfLines={1}
-            style={styles.nameText}
-          >{`${item.firstname} ${item.lastname}`}</Text>
-          <Text adjustsFontSizeToFit numberOfLines={1} style={styles.emailText}>
-            {item.email}
-          </Text>
-        </View>
-        <MaskedText mask="9999-999-9999" style={styles.phoneText}>
-          {item.phone}
-        </MaskedText>
-        <TouchableOpacity style={styles.actionButton}>
-          <MoreVerticalIcon />
-        </TouchableOpacity>
-      </AnimatedView>
-    );
-  };
-
   return (
     <>
       <KeyboardAwareScrollView
@@ -210,15 +232,32 @@ export default function ViewRecords({ navigation }: StackProps) {
             scrollEnabled={false}
             data={referrals}
             keyExtractor={(item) => item._id.toString()}
-            renderItem={renderItem}
-            ListHeaderComponent={renderListHeader}
+            renderItem={props => 
+              <ReferralItem
+                pageDirection={pageDirection.current}
+                totalReferral={referrals.length}
+                countPerPage={countPerPage}
+                {...props}
+              />}
+            ListHeaderComponent={<ListHeader />}
             contentContainerStyle={styles.listContent}
           />
         ) : (
-          renderEmptyState()
+          <EmptyState height={height} />
         )}
       </KeyboardAwareScrollView>
-      {hasReferrals && renderListFooter()}
+      {hasReferrals && (
+        <ListFooter
+          countPerPage={countPerPage}
+          startIndex={startIndex}
+          endIndex={endIndex}
+          total={total}
+          hasReachedStart={hasReachedStart}
+          hasReachedEnd={hasReachedEnd}
+          onViewPrevPage={onViewPrevPage}
+          onViewNextPage={onViewNextPage}
+        />
+      )}
     </>
   );
 }
